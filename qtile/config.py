@@ -43,7 +43,7 @@ keys = [
         Key([mod], "b", lazy.spawn("chromium"), desc="Web browser"),
         Key([mod], "d", lazy.spawn("discord"), desc="Discord app"),
         Key([mod], "s", lazy.spawn("slack"), desc="Slack app"),
-        Key([mod], "p", lazy.spawn("flameshot"), desc="Screenshot tool"),
+        Key([mod], "p", lazy.spawn("flameshot gui"), desc="Screenshot tool"),
 
 
 
