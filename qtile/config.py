@@ -262,6 +262,117 @@ screens = [
         # wallpaper="~/Downloads/code_wallpaper.png",
         wallpaper_mode='fill',
     ),
+    Screen(
+        top=bar.Bar(
+            [
+                widget.CurrentLayoutIcon(
+                    padding=4,
+                    scale=0.7,
+                    foreground="#d8dee9",
+                    background="#2e3440"
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.GroupBox(
+                    font="RobotoMono Nerd Font Bold",
+                    fontsize=12,
+                    margin_y=2,
+                    margin_x=3,
+                    padding_y=2,
+                    padding_x=3,
+                    borderwidth=0,
+                    disable_drag=True,
+                    active="#4c566a",
+                    inactive="#2e3440",
+                    rounded=False,
+                    highlight_method="text",
+                    this_current_screen_border="#d8dee9",
+                    foreground="#4c566a",
+                    background="#2e3440"
+                ),
+                widget.Prompt(
+                    font="RobotoMono Nerd Font",
+                    fontsize=12,
+                    background="#2e3440",
+                    foreground="#d8dee9"
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.WindowTabs(
+                    font="RobotoMono Nerd Font",
+                    fontsize=12,
+                    foreground="#d8dee9",
+                    background="#2e3440"
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.Clock(
+                    background="#2e3440",
+                    foreground="#d8dee9",
+                    font="RobotoMono Nerd Font Bold",
+                    fontsize=12,
+                    format="%a %d %b %H:%M",
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.Wlan(
+                    font="RobotoMono Nerd Font Bold",
+                    fontsize=12,
+                    background="#2e3440",
+                    foreground="#d8dee9",
+                    format="{essid} {percent:2.0%}"
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.Volume(
+                    font="RobotoMono Nerd Font Bold",
+                    fontsize=12,
+                    background="#2e3440",
+                    foreground="#d8dee9",
+                    fmt="Vol: {}"
+                ),
+                widget.Sep(
+                    linewidth=1,
+                    padding=5,
+                    foreground="#ff0000",
+                    background="#2e3440"
+                ),
+                widget.Battery(
+                    format="Battery: {percent:2.0%}",
+                    show_short_text="False",
+                    font="RobotoMono Nerd Font Bold",
+                    fontsize=12,
+                    background="#2e3440",
+                    foreground="#d8dee9",
+                ),
+            ],
+            # Sets bar height
+            24,
+        ),
+        # Set wallpaper
+        # wallpaper="~/Downloads/code_wallpaper.png",
+        wallpaper_mode='fill',
+    ),
 ]
 
 # Drag floating layouts.
