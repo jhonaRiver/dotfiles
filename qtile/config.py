@@ -259,7 +259,7 @@ screens = [
             24,
         ),
         # Set wallpaper
-        # wallpaper="~/Downloads/code_wallpaper.png",
+        wallpaper="~/dotfiles/qtile/wallpaper/eat-sleep-code-repeat.png",
         wallpaper_mode='fill',
     ),
     Screen(
@@ -370,7 +370,7 @@ screens = [
             24,
         ),
         # Set wallpaper
-        # wallpaper="~/Downloads/code_wallpaper.png",
+        # wallpaper="./wallpaper/eat-sleep-code-repeat.png",
         wallpaper_mode='fill',
     ),
 ]
