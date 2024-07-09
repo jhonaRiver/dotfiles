@@ -300,6 +300,7 @@ keys = [
     Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
     Key([mod], "e", lazy.spawn(file_manager), desc="Launch file manager"),
     Key(["control", "mod1"], "Delete", lazy.spawn(powermenu), desc="Launch powermenu"),
+    Key([mod, "shift"], "r", lazy.spawncmd(), desc="Launch command"),
     
     # Qtile
     
@@ -399,12 +400,7 @@ left = [
         fmt=groupBox#'●'
     ),
 
-    widget.CurrentLayout(
-        fmt="Current layout : {}",
-        mouse_callbacks={
-            'Button2': lambda: None,
-            'Button3': lazy.prev_layout()
-        },
+    widget.Prompt(
     ),
 ]
 
@@ -420,14 +416,11 @@ right = [
             measure_swap="G",
             format="   {MemUsed: .2f}{mm} /{MemTotal: .2f}{mm}",
         ),
-
-        widget.Memory(
-            measure_mem="G",
-            measure_swap="G",
-            format="🖴 {SwapUsed: .2f}{ms} /{SwapTotal: .2f}{ms}",
+        widget.Wlan(
+            format='{essid} {percent:2.0%}'
         ),
     ],
-
+    
     widget.Volume(
         step=2,
         fmt=volume,
@@ -436,9 +429,12 @@ right = [
         limit_max_volume=True,
         volume_app="pavucontrol",
     ),
+    widget.Battery(
+        format="{percent:2.0%} {hour:d}:{min:02d}"
+    ),
 
     widget.Clock(
-        format="%A %d %B %Y %H:%M",
+        format="%A %b %d %Y %I:%M %p",
     ),
 
     widget.TextBox(
@@ -469,7 +465,7 @@ for widget_group in filter(lambda g: isinstance(g, list), right):
 screens = [
     Screen(
         top=bar.Bar(
-            widgets=[widget.Spacer(length=widget_left_offset, decorations=[])] + left + [widget.WindowName(foreground="#00000000", fmt="", decorations=[])] + right + [widget.Spacer(length=widget_right_offset, decorations=[])],
+            widgets=[widget.Spacer(length=widget_left_offset, decorations=[])] + left + [widget.WindowName(foreground=bar_foreground_color, format="{name}", decorations=[])] + right + [widget.Spacer(length=widget_right_offset, decorations=[])],
             size=bar_size,
             background = bar_background_color + hex(int(bar_background_opacity*255))[2:],
             margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
