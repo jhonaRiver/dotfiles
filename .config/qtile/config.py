@@ -2,16 +2,24 @@
 # By rei/lactua
 
 
-
-#   _____  _____  _____  _____  _____  _____  __     _____  _____                               
-#  |  |  ||  _  || __  ||     ||  _  || __  ||  |   |   __||   __|                              
-#  |  |  ||     ||    -||-   -||     || __ -||  |__ |   __||__   |                              
-#   \___/ |__|__||__|__||_____||__|__||_____||_____||_____||_____| 
-
+#   _____  _____  _____  _____  _____  _____  __     _____  _____
+#  |  |  ||  _  || __  ||     ||  _  || __  ||  |   |   __||   __|
+#  |  |  ||     ||    -||-   -||     || __ -||  |__ |   __||__   |
+#   \___/ |__|__||__|__||_____||__|__||_____||_____||_____||_____|
 
 
 # Color Theme
 
+from json import dump, load
+from qtile_extras import widget
+from libqtile.lazy import lazy
+from libqtile.config import Click, Drag, Group, Key, Match, Screen
+from libqtile import layout, qtile, hook, bar, core
+import subprocess
+from datetime import datetime
+from os import system, listdir, makedirs
+from subprocess import run
+from os.path import expanduser, exists, normpath, getctime
 theme = {
     'foreground': '#cdd6f4',
     'lighter_background': '#45475a',
@@ -28,19 +36,19 @@ theme = {
 }
 
 
-
 # General
 
 mod = "mod4"
 terminal = "kitty"
-browser = "chromium"
+browser = "google-chrome"
 file_manager = "thunar"
 launcher = "rofi -show drun"
 powermenu = "rofi -show menu -modi 'menu:~/.local/share/rofi/scripts/rofi-power-menu --choices=shutdown/reboot/suspend/logout' -config ~/.config/rofi/power.rasi"
-screenshots_path = "~/Images/screenshots/" # creates if donesn't exists
-layouts_saved_file = "~/.config/qtile/layouts_saved.json" # creates if donesn't exists
+screenshots_path = "~/Images/screenshots/"  # creates if donesn't exists
+# creates if donesn't exists
+layouts_saved_file = "~/.config/qtile/layouts_saved.json"
 autostart_file = "~/.config/qtile/autostart.sh"
-wallpapers_path = "~/.local/share/wallpapers/" # creates if donesn't exists
+wallpapers_path = "~/.local/share/wallpapers/"  # creates if donesn't exists
 
 floating_apps = [
     'nitrogen',
@@ -54,8 +62,10 @@ num_keys = "123456789"
 # Groups
 
 groups_count = 5
-groups_names = list(map(str, range(1, groups_count + 1))) # Groups names **IN THE PROGRAM**, you probably don't need to change it
-groups_labels = ['●' for _ in range(groups_count)] # How the groups are named in the top bar
+# Groups names **IN THE PROGRAM**, you probably don't need to change it
+groups_names = list(map(str, range(1, groups_count + 1)))
+# How the groups are named in the top bar
+groups_labels = ['●' for _ in range(groups_count)]
 # Alternatives :
 # groups_labels = [str(i) for i in range(1, groups_count + 1)]
 # groups_labels = ['ENT', 'CDE', 'WRK', 'GMS', 'OTH']
@@ -87,7 +97,6 @@ layouts_border_focus_color = theme['blue']
 layouts_border_on_single = True
 
 
-
 # Top bar
 
 bar_top_margin = 10
@@ -114,21 +123,11 @@ widget_background_opacity = 0.9
 widget_background_radius = 14
 
 
-
-#   _____       _  _   
-#  |     | ___ |_|| |_ 
+#   _____       _  _
+#  |     | ___ |_|| |_
 #  |-   -||   || ||  _|
-#  |_____||_|_||_||_|  
+#  |_____||_|_||_||_|
 
-from os.path import expanduser, exists, normpath, getctime
-from subprocess import run
-from os import system, listdir, makedirs
-from datetime import datetime
-from libqtile import layout, qtile, hook, bar, core
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
-from libqtile.lazy import lazy
-from qtile_extras import widget
-from json import dump, load
 
 screenshots_path = expanduser(screenshots_path)
 layouts_saved_file = expanduser(layouts_saved_file)
@@ -145,14 +144,16 @@ if not exists(screenshots_path):
 if not exists(wallpapers_path):
     makedirs(wallpapers_path)
 
+
 def guess(apps):
     for app in apps:
-        if exists(f'/bin/{app}'): break
+        if exists(f'/bin/{app}'):
+            break
 
     return app
 
 
-#   _____  _____  _____  _____  _____  _____ 
+#   _____  _____  _____  _____  _____  _____
 #  |   __|| __  ||     ||  |  ||  _  ||   __|
 #  |  |  ||    -||  |  ||  |  ||   __||__   |
 #  |_____||__|__||_____||_____||__|   |_____|
@@ -160,10 +161,10 @@ def guess(apps):
 groups = [Group(name) for name in groups_names]
 
 
-#   __     _____  __ __  _____  _____  _____  _____                                             
-#  |  |   |  _  ||  |  ||     ||  |  ||_   _||   __|                                            
-#  |  |__ |     ||_   _||  |  ||  |  |  | |  |__   |                                            
-#  |_____||__|__|  |_|  |_____||_____|  |_|  |_____|  
+#   __     _____  __ __  _____  _____  _____  _____
+#  |  |   |  _  ||  |  ||     ||  |  ||_   _||   __|
+#  |  |__ |     ||_   _||  |  ||  |  |  | |  |__   |
+#  |_____||__|__|  |_|  |_____||_____|  |_|  |_____|
 
 layout_theme = {
     "border_width": layouts_border_width,
@@ -198,19 +199,22 @@ layouts_tweaks = {
     },
 }
 
-layouts = [getattr(layout, i)(**(layout_theme|layouts_tweaks.get(i, {}))) for i in layouts]
+layouts = [getattr(layout, i)(
+    **(layout_theme | layouts_tweaks.get(i, {}))) for i in layouts]
 
 
-#   _____  _____  _____  _____  _____  _____  _____  _____  _____ 
+#   _____  _____  _____  _____  _____  _____  _____  _____  _____
 #  |   __||  |  ||     || __  ||_   _||     ||  |  ||_   _||   __|
 #  |__   ||     ||  |  ||    -|  | |  |   --||  |  |  | |  |__   |
 #  |_____||__|__||_____||__|__|  |_|  |_____||_____|  |_|  |_____|
 
 @lazy.function
 def screenshot(_qtile, mode=0):
-    file_path = datetime.now().strftime(f"{screenshots_path}%d-%m-%Y-%H-%M-%S.jpg")
+    file_path = datetime.now().strftime(
+        f"{screenshots_path}%d-%m-%Y-%H-%M-%S.jpg")
     system(f"flameshot gui --path {file_path}")
     system(f"xclip -selection clipboard -t image/png -i {file_path}")
+
 
 class Wallpaper:
     def formatName(name):
@@ -218,26 +222,30 @@ class Wallpaper:
 
         for c in backslash:
             name = name.replace(c, '\\'+c)
-        
+
         return name
 
     def restorePointer():
         if exists(expanduser('~/.config/nitrogen/bg-saved.cfg')):
             with open(expanduser('~/.config/nitrogen/bg-saved.cfg'), 'r') as file:
-                path = file.read().splitlines()[1].removeprefix('file=').strip() # Get saved background path
+                path = file.read().splitlines()[1].removeprefix(
+                    'file=').strip()  # Get saved background path
                 directory = normpath(path[::-1].split('/', 1)[1][::-1])
                 name = path.split('/')[-1]
 
-            if normpath(directory) == normpath(wallpapers_path) and name in Wallpaper.wallpapers: # Checks if the background folder is wallpapers_path is in wallpapers
-                Wallpaper.current = Wallpaper.wallpapers.index(name) # Set the pointer on the saved background
+            # Checks if the background folder is wallpapers_path is in wallpapers
+            if normpath(directory) == normpath(wallpapers_path) and name in Wallpaper.wallpapers:
+                Wallpaper.current = Wallpaper.wallpapers.index(
+                    name)  # Set the pointer on the saved background
                 return
-        
+
         Wallpaper.current = 0
         return
 
     def init():
         Wallpaper.wallpapers = listdir(wallpapers_path)
-        Wallpaper.wallpapers.sort(key=lambda w: getctime(f"{wallpapers_path}{w}")) # Sort by creation date
+        Wallpaper.wallpapers.sort(key=lambda w: getctime(
+            f"{wallpapers_path}{w}"))  # Sort by creation date
         # wallpapers.sort(key=str.lower) # sort by name
 
         Wallpaper.mode = "zoom-fill"
@@ -245,7 +253,8 @@ class Wallpaper:
         Wallpaper.restorePointer()
 
     def set():
-        system(f'nitrogen --save --set-{Wallpaper.mode} {wallpapers_path}{Wallpaper.formatName(Wallpaper.wallpapers[Wallpaper.current])}')
+        system(f'nitrogen --save --set-{Wallpaper.mode} {wallpapers_path}{
+               Wallpaper.formatName(Wallpaper.wallpapers[Wallpaper.current])}')
 
     @lazy.function
     def next(_qtile):
@@ -256,7 +265,8 @@ class Wallpaper:
     def previous(_qtile):
         Wallpaper.current = (Wallpaper.current - 1) % len(Wallpaper.wallpapers)
         Wallpaper.set()
-    
+
+
 Wallpaper.init()
 
 
@@ -268,27 +278,38 @@ keys = [
     Key([mod], "right", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "down", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "up", lazy.layout.up(), desc="Move focus up"),
-    Key([mod, "shift"], "left", lazy.layout.shuffle_left(), desc="Move window to the left"),
-    Key([mod, "shift"], "right", lazy.layout.shuffle_right(), desc="Move window to the right"),
+    Key([mod, "shift"], "left", lazy.layout.shuffle_left(),
+        desc="Move window to the left"),
+    Key([mod, "shift"], "right", lazy.layout.shuffle_right(),
+        desc="Move window to the right"),
     Key([mod, "shift"], "down", lazy.layout.shuffle_down(), desc="Move window down"),
     Key([mod, "shift"], "up", lazy.layout.shuffle_up(), desc="Move window up"),
-    Key([mod, "control"], "left", lazy.layout.grow_left(), desc="Grow window to the left"),
-    Key([mod, "control"], "right", lazy.layout.grow_right(), desc="Grow window to the right"),
+    Key([mod, "control"], "left", lazy.layout.grow_left(),
+        desc="Grow window to the left"),
+    Key([mod, "control"], "right", lazy.layout.grow_right(),
+        desc="Grow window to the right"),
     Key([mod, "control"], "down", lazy.layout.grow_down(), desc="Grow window down"),
     Key([mod, "control"], "up", lazy.layout.grow_up(), desc="Grow window up"),
     Key([mod], "j", lazy.layout.grow(), desc="Grow window"),
     Key([mod], "h", lazy.layout.shrink(), desc="Shrink window"),
-    Key([mod], "r", lazy.layout.normalize(), desc="Reset all window sizes"),
+    Key([mod, "shift"], "r", lazy.layout.normalize(),
+        desc="Reset all window sizes"),
     Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
-    Key([mod], "m", lazy.window.toggle_fullscreen(), desc="Toggle fullscreen on the focused window",),
-    Key([mod], "f", lazy.window.toggle_floating(), desc="Toggle floating on the focused window"),
-    Key([mod], "Tab", lazy.layout.next(), desc="Move window focus to other window"),
+    Key([mod], "m", lazy.window.toggle_fullscreen(),
+        desc="Toggle fullscreen on the focused window",),
+    Key([mod], "f", lazy.window.toggle_floating(),
+        desc="Toggle floating on the focused window"),
+    Key([mod], "Tab", lazy.layout.next(),
+        desc="Move window focus to other window"),
 
     # Media
-    
-    Key([], "XF86AudioRaiseVolume", lazy.spawn('pactl set-sink-volume @DEFAULT_SINK@ +5%')),
-    Key([], "XF86AudioLowerVolume", lazy.spawn('pactl set-sink-volume @DEFAULT_SINK@ -5%')),
-    Key([], "XF86AudioMute", lazy.spawn('pactl set-sink-mute @DEFAULT_SINK@ toggle')),
+
+    Key([], "XF86AudioRaiseVolume", lazy.spawn(
+        'pactl set-sink-volume @DEFAULT_SINK@ +5%')),
+    Key([], "XF86AudioLowerVolume", lazy.spawn(
+        'pactl set-sink-volume @DEFAULT_SINK@ -5%')),
+    Key([], "XF86AudioMute", lazy.spawn(
+        'pactl set-sink-mute @DEFAULT_SINK@ toggle')),
     Key([], "XF86AudioPlay", lazy.spawn('playerctl play-pause')),
     Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
     Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
@@ -299,42 +320,48 @@ keys = [
     Key([mod], "Space", lazy.spawn(launcher), desc="Launch launcher"),
     Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
     Key([mod], "e", lazy.spawn(file_manager), desc="Launch file manager"),
-    Key(["control", "mod1"], "Delete", lazy.spawn(powermenu), desc="Launch powermenu"),
-    Key([mod, "shift"], "r", lazy.spawncmd(), desc="Launch command"),
-    
+    Key(["control", "mod1"], "Delete", lazy.spawn(
+        powermenu), desc="Launch powermenu"),
+    Key([mod], "r", lazy.spawncmd(), desc="Launch command"),
+
     # Qtile
-    
+
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
     Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
 
     # Screenshot
 
     Key([], "Print", screenshot(), desc="Take a screenshot"),
-    Key(["mod1"], "Print", screenshot(mode=1), desc="Take a screenshot of a zone or a window"),
+    Key(["mod1"], "Print", screenshot(mode=1),
+        desc="Take a screenshot of a zone or a window"),
 
     # Wallpapers
 
     Key([mod], "w", Wallpaper.next(), desc="Next background"),
     Key([mod, "shift"], "w", Wallpaper.previous(), desc="Previous background"),
-    
+
     # Layouts
 
     Key([mod], "l", lazy.next_layout(), desc="Toggle between layouts"),
     Key([mod, "shift"], 'l', lazy.prev_layout(), desc="Previous layout"),
-    *[Key([mod, "control"], num_keys[index], lazy.group.setlayout(layout.name), desc=f"Switch to the {layout.name} layout") for index, layout in enumerate(layouts)],
-    
+    *[Key([mod, "control"], num_keys[index], lazy.group.setlayout(layout.name),
+          desc=f"Switch to the {layout.name} layout") for index, layout in enumerate(layouts)],
+
     # Groups
 
     Key([mod, "mod1"], "right", lazy.screen.next_group(), desc="Go to next group"),
-    Key([mod, "mod1"], "left", lazy.screen.prev_group(), desc="Go to previous group"),
-    *[Key([mod], num_keys[index], lazy.group[group.name].toscreen(), desc=f"Switch to the {group.name} group") for index, group in enumerate(groups)],
-    *[Key([mod, "shift"], num_keys[index], lazy.window.togroup(group.name, switch_group=True), desc=f"Move focused window to the {group.name} group") for index, group in enumerate(groups)],
+    Key([mod, "mod1"], "left", lazy.screen.prev_group(),
+        desc="Go to previous group"),
+    *[Key([mod], num_keys[index], lazy.group[group.name].toscreen(),
+          desc=f"Switch to the {group.name} group") for index, group in enumerate(groups)],
+    *[Key([mod, "shift"], num_keys[index], lazy.window.togroup(group.name, switch_group=True),
+          desc=f"Move focused window to the {group.name} group") for index, group in enumerate(groups)],
 ]
 
 
-#   _____  _____  _____  _____  _____  _____  _____                                             
-#  |   __||     || __  ||   __||   __||   | ||   __|                                            
-#  |__   ||   --||    -||   __||   __|| | | ||__   |                                            
+#   _____  _____  _____  _____  _____  _____  _____
+#  |   __||     || __  ||   __||   __||   | ||   __|
+#  |__   ||   --||    -||   __||   __|| | | ||__   |
 #  |_____||_____||__|__||_____||_____||_|___||_____|
 
 default_background = {
@@ -346,9 +373,11 @@ default_background = {
     "group": True
 }
 
+
 class WidgetTweaker:
     def __init__(self, func):
         self.format = func
+
 
 @WidgetTweaker
 def groupBox(output):
@@ -377,6 +406,7 @@ def volume(output):
     else:
         return output
 
+
 widget_defaults = dict(
     font=bar_font,
     foreground=bar_foreground_color,
@@ -397,7 +427,7 @@ left = [
         active=bar_foreground_color,
         block_highlight_text_color=theme['yellow'],
         padding=7,
-        fmt=groupBox#'●'
+        fmt=groupBox  # '●'
     ),
 
     widget.Prompt(
@@ -409,28 +439,26 @@ right = [
         format="{load_percent}%",
         fmt="󰍛   {}",
     ),
-        
+
     [
         widget.Memory(
             measure_mem="G",
             measure_swap="G",
             format="   {MemUsed: .2f}{mm} /{MemTotal: .2f}{mm}",
         ),
-        widget.Wlan(
-            format='{essid} {percent:2.0%}'
-        ),
     ],
-    
+
     widget.Volume(
         step=2,
         fmt=volume,
-        mouse_callbacks={'Button1':lazy.spawn('pactl set-sink-mute @DEFAULT_SINK@ toggle')},
+        mouse_callbacks={'Button1': lazy.spawn(
+            'pactl set-sink-mute @DEFAULT_SINK@ toggle')},
         update_interval=0.01,
         limit_max_volume=True,
         volume_app="pavucontrol",
     ),
     widget.Battery(
-        format="{percent:2.0%} {hour:d}:{min:02d}"
+        format="{percent:2.0%}"
     ),
 
     widget.Clock(
@@ -442,7 +470,8 @@ right = [
         mouse_callbacks={
             'Button1': lazy.spawn(powermenu)
         },
-        decorations=[widget.decorations.RectDecoration(**default_background, extrawidth=3)],
+        decorations=[widget.decorations.RectDecoration(
+            **default_background, extrawidth=3)],
     ),
 ]
 
@@ -465,30 +494,33 @@ for widget_group in filter(lambda g: isinstance(g, list), right):
 screens = [
     Screen(
         top=bar.Bar(
-            widgets=[widget.Spacer(length=widget_left_offset, decorations=[])] + left + [widget.WindowName(foreground=bar_foreground_color, format="{name}", decorations=[])] + right + [widget.Spacer(length=widget_right_offset, decorations=[])],
+            widgets=[widget.Spacer(length=widget_left_offset, decorations=[])] + left + [widget.WindowName(foreground=bar_foreground_color,
+                                                                                                           format="{name}", decorations=[])] + right + [widget.Spacer(length=widget_right_offset, decorations=[])],
             size=bar_size,
-            background = bar_background_color + hex(int(bar_background_opacity*255))[2:],
-            margin = [bar_top_margin, bar_right_margin, bar_bottom_margin-layouts_margin, bar_left_margin],
-            opacity = bar_global_opacity
+            background=bar_background_color +
+            hex(int(bar_background_opacity*255))[2:],
+            margin=[bar_top_margin, bar_right_margin,
+                    bar_bottom_margin-layouts_margin, bar_left_margin],
+            opacity=bar_global_opacity
         ),
     ),
 ]
 
 
-
-#   _____  _____  _____  _____  _____                                                           
-#  |     ||     ||  |  ||   __||   __|                                                          
-#  | | | ||  |  ||  |  ||__   ||   __|                                                          
+#   _____  _____  _____  _____  _____
+#  |     ||     ||  |  ||   __||   __|
+#  | | | ||  |  ||  |  ||__   ||   __|
 #  |_|_|_||_____||_____||_____||_____|
 
-DPX = 50 # Distance needed to grow one time on the X axis
-DPY = 25 # Distance needed to grow one time on the Y axis
+DPX = 50  # Distance needed to grow one time on the X axis
+DPY = 25  # Distance needed to grow one time on the Y axis
 
 last = {
     'x': 0,
     'y': 0,
     'client': ''
 }
+
 
 @lazy.function
 def resizeClientColumnsLayout(_qtile, x, y):
@@ -502,7 +534,8 @@ def resizeClientColumnsLayout(_qtile, x, y):
     _column = _layout.columns[_layout.current]
     _client = _column.clients[_column.current]
 
-    if abs(last['x'] - x) >= 5 * DPX or abs(last['y'] - y) >= 5 * DPY or _client.name != last['client']: # If the window title changed or x, y anormally low -> reset last
+    # If the window title changed or x, y anormally low -> reset last
+    if abs(last['x'] - x) >= 5 * DPX or abs(last['y'] - y) >= 5 * DPY or _client.name != last['client']:
         last = {
             'x': 0,
             'y': 0,
@@ -511,7 +544,7 @@ def resizeClientColumnsLayout(_qtile, x, y):
 
     delta_x = x - last['x']
     delta_y = y - last['y']
-    
+
     for _ in range(abs(delta_x) // DPX):
         if delta_x < 0:
             _layout.grow_left()
@@ -523,7 +556,7 @@ def resizeClientColumnsLayout(_qtile, x, y):
             _layout.grow_up()
         else:
             _layout.grow_down()
-    
+
     if abs(delta_x) // DPX or abs(delta_y) >= DPY:
         last = {
             'x': x,
@@ -533,15 +566,16 @@ def resizeClientColumnsLayout(_qtile, x, y):
 
 
 mouse = [
-    Drag([mod], "Button1", lazy.window.set_position_floating(), start=lazy.window.get_position()),
-    Drag([mod], "Button3", lazy.window.set_size_floating(), start=lazy.window.get_size()),
+    Drag([mod], "Button1", lazy.window.set_position_floating(),
+         start=lazy.window.get_position()),
+    Drag([mod], "Button3", lazy.window.set_size_floating(),
+         start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
     Drag([mod, "control"], "Button3", resizeClientColumnsLayout())
 ]
 
 
-
-#   _____  _____  _____  _____  _____    _____  _____  _____  _____  _____  _____  _____  _____ 
+#   _____  _____  _____  _____  _____    _____  _____  _____  _____  _____  _____  _____  _____
 #  |     ||_   _||  |  ||   __|| __  |  |   __||   __||_   _||_   _||     ||   | ||   __||   __|
 #  |  |  |  | |  |     ||   __||    -|  |__   ||   __|  | |    | |  |-   -|| | | ||  |  ||__   |
 #  |_____|  |_|  |__|__||_____||__|__|  |_____||_____|  |_|    |_|  |_____||_|___||_____||_____|
@@ -572,16 +606,18 @@ auto_minimize = False
 wmname = "Qtile"
 
 
-#   _____  _____  _____  _____  _____                                                           
-#  |  |  ||     ||     ||  |  ||   __|                                                          
-#  |     ||  |  ||  |  ||    -||__   |                                                          
-#  |__|__||_____||_____||__|__||_____| 
+#   _____  _____  _____  _____  _____
+#  |  |  ||     ||     ||  |  ||   __|
+#  |     ||  |  ||  |  ||    -||__   |
+#  |__|__||_____||_____||__|__||_____|
 
 ready = False
+
 
 @hook.subscribe.startup_once
 def _():
     run(autostart_file)
+
 
 @hook.subscribe.layout_change
 def _(layout, group):
@@ -596,6 +632,7 @@ def _(layout, group):
         with open(layouts_saved_file, 'w') as file:
             dump(layouts_saved, file)
 
+
 @hook.subscribe.startup
 def _():
     global ready
@@ -606,5 +643,10 @@ def _():
     for group in groups:
         if layouts_saved.get(group.name):
             qtile.groups_map.get(group.name).layout = layouts_saved[group.name]
-    
+
     ready = True
+
+
+# Default app
+def open_url(url):
+    run(["xdg-open", url])
