@@ -43,12 +43,15 @@ terminal = "kitty"
 browser = "google-chrome"
 file_manager = "thunar"
 launcher = "rofi -show drun"
+discord = "discord"
+slack = "slack"
+vscode = "code"
 powermenu = "rofi -show menu -modi 'menu:~/.local/share/rofi/scripts/rofi-power-menu --choices=shutdown/reboot/suspend/logout' -config ~/.config/rofi/power.rasi"
-screenshots_path = "~/Images/screenshots/"  # creates if donesn't exists
-# creates if donesn't exists
+screenshots_path = "~/Images/screenshots/"  # creates if doesn't exist
+# creates if doesn't exist
 layouts_saved_file = "~/.config/qtile/layouts_saved.json"
 autostart_file = "~/.config/qtile/autostart.sh"
-wallpapers_path = "~/.local/share/wallpapers/"  # creates if donesn't exists
+wallpapers_path = "~/.local/share/wallpapers/"  # creates if doesn't exist
 
 floating_apps = [
     'nitrogen',
@@ -313,6 +316,8 @@ keys = [
     Key([], "XF86AudioPlay", lazy.spawn('playerctl play-pause')),
     Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
     Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
+    Key([], "XF86MonBrightnessUp", lazy.spawn('brightnessctl s +5%')),
+    Key([], "XF86MonBrightnessDown", lazy.spawn('brightnessctl s 5%-')),
 
     # Launch
 
@@ -323,6 +328,9 @@ keys = [
     Key(["control", "mod1"], "Delete", lazy.spawn(
         powermenu), desc="Launch powermenu"),
     Key([mod], "r", lazy.spawncmd(), desc="Launch command"),
+    Key([mod], "d", lazy.spawn("discord"), desc="Launch discord"),
+    Key([mod], "s", lazy.spawn("slack"), desc="Launch slack"),
+    Key([mod], "c", lazy.spawn("code"), desc="Launch vs code"),
 
     # Qtile
 
