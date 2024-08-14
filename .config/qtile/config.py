@@ -39,7 +39,7 @@ theme = {
 # General
 
 mod = "mod4"
-terminal = "kitty"
+terminal = "alacritty"
 browser = "google-chrome"
 file_manager = "thunar"
 launcher = "rofi -show drun"
