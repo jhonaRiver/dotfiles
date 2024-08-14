@@ -1,660 +1,520 @@
-# Qtile config
-# By rei/lactua
+# Copyright (c) 2010 Aldo Cortesi
+# Copyright (c) 2010, 2014 dequis
+# Copyright (c) 2012 Randall Ma
+# Copyright (c) 2012-2014 Tycho Andersen
+# Copyright (c) 2012 Craig Barnes
+# Copyright (c) 2013 horsik
+# Copyright (c) 2013 Tao Sauvage
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in
+# all copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
 
-
-#   _____  _____  _____  _____  _____  _____  __     _____  _____
-#  |  |  ||  _  || __  ||     ||  _  || __  ||  |   |   __||   __|
-#  |  |  ||     ||    -||-   -||     || __ -||  |__ |   __||__   |
-#   \___/ |__|__||__|__||_____||__|__||_____||_____||_____||_____|
-
-
-# Color Theme
-
-from json import dump, load
+from libqtile import bar, layout
 from qtile_extras import widget
+from qtile_extras.widget.decorations import RectDecoration
+from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
 from libqtile.lazy import lazy
-from libqtile.config import Click, Drag, Group, Key, Match, Screen
-from libqtile import layout, qtile, hook, bar, core
-import subprocess
-from datetime import datetime
-from os import system, listdir, makedirs
-from subprocess import run
-from os.path import expanduser, exists, normpath, getctime
-theme = {
-    'foreground': '#cdd6f4',
-    'lighter_background': '#45475a',
-    'background': '#1e1e2e',
-    'darker_background': '#181825',
-    'black': '#45475A',
-    'red': '#F38BA8',
-    'green': '#A6E3A1',
-    'yellow': '#F9E2AF',
-    'blue': '#89B4FA',
-    'magenta': '#F5C2E7',
-    'cyan': '#94E2D5',
-    'white': '#BAC2DE'
-}
-
-
-# General
+from libqtile.utils import guess_terminal
 
 mod = "mod4"
 terminal = "alacritty"
 browser = "google-chrome"
 file_manager = "thunar"
 launcher = "rofi -show drun"
-discord = "discord"
-slack = "slack"
-vscode = "code"
-powermenu = "rofi -show menu -modi 'menu:~/.local/share/rofi/scripts/rofi-power-menu --choices=shutdown/reboot/suspend/logout' -config ~/.config/rofi/power.rasi"
-screenshots_path = "~/Images/screenshots/"  # creates if doesn't exist
-# creates if doesn't exist
-layouts_saved_file = "~/.config/qtile/layouts_saved.json"
+screenshots_path = "~/Images/screenshots/"
 autostart_file = "~/.config/qtile/autostart.sh"
-wallpapers_path = "~/.local/share/wallpapers/"  # creates if doesn't exist
-
-floating_apps = [
-    'nitrogen',
-]
-
-# Uncomment the first line for qwerty, the second for azerty
-num_keys = "123456789"
-# num_keys = "ampersand", "eacute", "quotedbl", "apostrophe", "parenleft", "minus", "egrave", "underscore", "ccedilla", "agrave"
-
-
-# Groups
-
-groups_count = 5
-# Groups names **IN THE PROGRAM**, you probably don't need to change it
-groups_names = list(map(str, range(1, groups_count + 1)))
-# How the groups are named in the top bar
-groups_labels = ['●' for _ in range(groups_count)]
-# Alternatives :
-# groups_labels = [str(i) for i in range(1, groups_count + 1)]
-# groups_labels = ['ENT', 'CDE', 'WRK', 'GMS', 'OTH']
-
-
-# Layouts
-
-# Uncomment to enable layout
-layouts = [
-    "Columns",
-    "Bsp",
-    # "RatioTile",
-    "MonadTall",
-    "MonadWide",
-    "Max",
-    # "Floating",
-    # "VerticalTile",
-    # "Stack",
-    # "Matrix",
-    # "Tile",
-    # "TreeTab",
-    # "Zoomy",
-]
-
-layouts_margin = 10
-layouts_border_width = 5
-layouts_border_color = theme['lighter_background']
-layouts_border_focus_color = theme['blue']
-layouts_border_on_single = True
-
-
-# Top bar
-
-bar_top_margin = 10
-bar_bottom_margin = 10
-bar_left_margin = 10
-bar_right_margin = 10
-bar_size = 37
-bar_background_color = theme['background']
-bar_foreground_color = theme['foreground']
-bar_background_opacity = 0.85
-bar_global_opacity = 1.0
-bar_font = "Opensans"
-bar_fontsize = 13
-
-widget_gap = 17
-widget_left_offset = 15
-widget_right_offset = 15
-widget_padding = 10
-
-widget_background_y_padding = 5
-widget_background_x_padding = 0
-widget_background_color = theme['darker_background']
-widget_background_opacity = 0.9
-widget_background_radius = 14
-
-
-#   _____       _  _
-#  |     | ___ |_|| |_
-#  |-   -||   || ||  _|
-#  |_____||_|_||_||_|
-
-
-screenshots_path = expanduser(screenshots_path)
-layouts_saved_file = expanduser(layouts_saved_file)
-autostart_file = expanduser(autostart_file)
-wallpapers_path = expanduser(wallpapers_path)
-
-if not exists(path := layouts_saved_file):
-    with open(path, 'w') as file:
-        file.write('{}')
-
-if not exists(screenshots_path):
-    makedirs(screenshots_path)
-
-if not exists(wallpapers_path):
-    makedirs(wallpapers_path)
-
-
-def guess(apps):
-    for app in apps:
-        if exists(f'/bin/{app}'):
-            break
-
-    return app
-
-
-#   _____  _____  _____  _____  _____  _____
-#  |   __|| __  ||     ||  |  ||  _  ||   __|
-#  |  |  ||    -||  |  ||  |  ||   __||__   |
-#  |_____||__|__||_____||_____||__|   |_____|
-
-groups = [Group(name) for name in groups_names]
-
-
-#   __     _____  __ __  _____  _____  _____  _____
-#  |  |   |  _  ||  |  ||     ||  |  ||_   _||   __|
-#  |  |__ |     ||_   _||  |  ||  |  |  | |  |__   |
-#  |_____||__|__|  |_|  |_____||_____|  |_|  |_____|
-
-layout_theme = {
-    "border_width": layouts_border_width,
-    "margin": layouts_margin,
-    "border_focus": layouts_border_focus_color,
-    "border_normal": layouts_border_color,
-    "border_on_single": layouts_border_on_single
-}
-
-layouts_tweaks = {
-    "Columns": {
-        "grow_amount": 5,
-        "fair": False,
-        "num_columns": 2,
-    },
-    "MonadTall": {
-        "ratio": 0.57,
-        "min_ratio": 0.5,
-        "max_ratio": 0.7,
-        "change_size": 20,
-        "change_ratio": 0.01,
-    },
-    "MonadWide": {
-        "ratio": 0.55,
-        "min_ratio": 0.45,
-        "max_ratio": 0.7,
-        "change_size": 35,
-        "change_ratio": 0.02,
-    },
-    "Bsp": {
-        "fair": False,
-    },
-}
-
-layouts = [getattr(layout, i)(
-    **(layout_theme | layouts_tweaks.get(i, {}))) for i in layouts]
-
-
-#   _____  _____  _____  _____  _____  _____  _____  _____  _____
-#  |   __||  |  ||     || __  ||_   _||     ||  |  ||_   _||   __|
-#  |__   ||     ||  |  ||    -|  | |  |   --||  |  |  | |  |__   |
-#  |_____||__|__||_____||__|__|  |_|  |_____||_____|  |_|  |_____|
-
-@lazy.function
-def screenshot(_qtile, mode=0):
-    file_path = datetime.now().strftime(
-        f"{screenshots_path}%d-%m-%Y-%H-%M-%S.jpg")
-    system(f"flameshot gui --path {file_path}")
-    system(f"xclip -selection clipboard -t image/png -i {file_path}")
-
-
-class Wallpaper:
-    def formatName(name):
-        backslash = r"""\&~"#'{([|`^$*"""
-
-        for c in backslash:
-            name = name.replace(c, '\\'+c)
-
-        return name
-
-    def restorePointer():
-        if exists(expanduser('~/.config/nitrogen/bg-saved.cfg')):
-            with open(expanduser('~/.config/nitrogen/bg-saved.cfg'), 'r') as file:
-                path = file.read().splitlines()[1].removeprefix(
-                    'file=').strip()  # Get saved background path
-                directory = normpath(path[::-1].split('/', 1)[1][::-1])
-                name = path.split('/')[-1]
-
-            # Checks if the background folder is wallpapers_path is in wallpapers
-            if normpath(directory) == normpath(wallpapers_path) and name in Wallpaper.wallpapers:
-                Wallpaper.current = Wallpaper.wallpapers.index(
-                    name)  # Set the pointer on the saved background
-                return
-
-        Wallpaper.current = 0
-        return
-
-    def init():
-        Wallpaper.wallpapers = listdir(wallpapers_path)
-        Wallpaper.wallpapers.sort(key=lambda w: getctime(
-            f"{wallpapers_path}{w}"))  # Sort by creation date
-        # wallpapers.sort(key=str.lower) # sort by name
-
-        Wallpaper.mode = "zoom-fill"
-
-        Wallpaper.restorePointer()
-
-    def set():
-        system(f'nitrogen --save --set-{Wallpaper.mode} {wallpapers_path}{
-               Wallpaper.formatName(Wallpaper.wallpapers[Wallpaper.current])}')
-
-    @lazy.function
-    def next(_qtile):
-        Wallpaper.current = (Wallpaper.current + 1) % len(Wallpaper.wallpapers)
-        Wallpaper.set()
-
-    @lazy.function
-    def previous(_qtile):
-        Wallpaper.current = (Wallpaper.current - 1) % len(Wallpaper.wallpapers)
-        Wallpaper.set()
-
-
-Wallpaper.init()
-
+wallpapers_path = "~/.local/share/wallpapers/"
 
 keys = [
-
-    # Window Management
-
+    # A list of available commands that can be bound to keys can be found
+    # at https://docs.qtile.org/en/latest/manual/config/lazy.html
+    # Switch between windows
     Key([mod], "left", lazy.layout.left(), desc="Move focus to left"),
     Key([mod], "right", lazy.layout.right(), desc="Move focus to right"),
     Key([mod], "down", lazy.layout.down(), desc="Move focus down"),
     Key([mod], "up", lazy.layout.up(), desc="Move focus up"),
-    Key([mod, "shift"], "left", lazy.layout.shuffle_left(),
-        desc="Move window to the left"),
-    Key([mod, "shift"], "right", lazy.layout.shuffle_right(),
-        desc="Move window to the right"),
+    Key([mod], "space", lazy.layout.next(),
+        desc="Move window focus to other window"),
+    # Move windows between left/right columns or move up/down in current stack.
+    # Moving out of range in Columns layout will create new column.
+    Key([mod, "shift"], "left", lazy.layout.swap_left().when(layout='monadtall'),
+        lazy.layout.shuffle_left().when(layout='columns'), desc="Move window to the left"),
+    Key([mod, "shift"], "right", lazy.layout.swap_right().when(layout='monadtall'),
+        lazy.layout.shuffle_right().when(layout='columns'), desc="Move window to the right"),
     Key([mod, "shift"], "down", lazy.layout.shuffle_down(), desc="Move window down"),
     Key([mod, "shift"], "up", lazy.layout.shuffle_up(), desc="Move window up"),
+    # Grow windows. If current window is on the edge of screen and direction
+    # will be to screen edge - window would shrink.
+    # TODO: Fix window growth
     Key([mod, "control"], "left", lazy.layout.grow_left(),
         desc="Grow window to the left"),
     Key([mod, "control"], "right", lazy.layout.grow_right(),
         desc="Grow window to the right"),
     Key([mod, "control"], "down", lazy.layout.grow_down(), desc="Grow window down"),
     Key([mod, "control"], "up", lazy.layout.grow_up(), desc="Grow window up"),
-    Key([mod], "j", lazy.layout.grow(), desc="Grow window"),
-    Key([mod], "h", lazy.layout.shrink(), desc="Shrink window"),
-    Key([mod, "shift"], "r", lazy.layout.normalize(),
-        desc="Reset all window sizes"),
-    Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
-    Key([mod], "m", lazy.window.toggle_fullscreen(),
-        desc="Toggle fullscreen on the focused window",),
-    Key([mod], "f", lazy.window.toggle_floating(),
-        desc="Toggle floating on the focused window"),
-    Key([mod], "Tab", lazy.layout.next(),
-        desc="Move window focus to other window"),
-
-    # Media
-
-    Key([], "XF86AudioRaiseVolume", lazy.spawn(
-        'pactl set-sink-volume @DEFAULT_SINK@ +5%')),
-    Key([], "XF86AudioLowerVolume", lazy.spawn(
-        'pactl set-sink-volume @DEFAULT_SINK@ -5%')),
-    Key([], "XF86AudioMute", lazy.spawn(
-        'pactl set-sink-mute @DEFAULT_SINK@ toggle')),
-    Key([], "XF86AudioPlay", lazy.spawn('playerctl play-pause')),
-    Key([], "XF86AudioPrev", lazy.spawn('playerctl previous')),
-    Key([], "XF86AudioNext", lazy.spawn('playerctl next')),
-    Key([], "XF86MonBrightnessUp", lazy.spawn('brightnessctl s +5%')),
-    Key([], "XF86MonBrightnessDown", lazy.spawn('brightnessctl s 5%-')),
-
-    # Launch
-
+    # MonadTall growing stuff
+    Key([mod], "i", lazy.layout.grow()),
+    Key([mod], "m", lazy.layout.shrink()),
+    Key([mod], "o", lazy.layout.maximize().when(layout='monadtall')),
+    # TODO: Verify what normalize does
+    Key([mod], "n", lazy.layout.normalize(), desc="Reset all window sizes"),
+    Key([mod, "shift"], "r", lazy.layout.reset().when(layout='monadtall')),
+    Key([mod, "shift"], "space", lazy.layout.flip().when(layout='monadtall')),
+    # Toggle between split and unsplit sides of stack.
+    # Split = all windows displayed
+    # Unsplit = 1 window displayed, like Max layout, but still with
+    # multiple stack panes
+    # TODO: Verify what split does
+    Key(
+        [mod, "shift"],
+        "Return",
+        lazy.layout.toggle_split(),
+        desc="Toggle between split and unsplit sides of stack",
+    ),
     Key([mod], "Return", lazy.spawn(terminal), desc="Launch terminal"),
-    Key([mod], "Space", lazy.spawn(launcher), desc="Launch launcher"),
-    Key([mod], "b", lazy.spawn(browser), desc="Launch browser"),
-    Key([mod], "e", lazy.spawn(file_manager), desc="Launch file manager"),
-    Key(["control", "mod1"], "Delete", lazy.spawn(
-        powermenu), desc="Launch powermenu"),
-    Key([mod], "r", lazy.spawncmd(), desc="Launch command"),
-    Key([mod], "d", lazy.spawn("discord"), desc="Launch discord"),
-    Key([mod], "s", lazy.spawn("slack"), desc="Launch slack"),
-    Key([mod], "c", lazy.spawn("code"), desc="Launch vs code"),
 
-    # Qtile
-
+    # Toggle between different layouts as defined below
+    Key([mod], "Tab", lazy.next_layout(),
+        lazy.widget["layout_icon"].update("").when(layout="max"),
+        lazy.widget["layout_icon"].update("").when(layout="monadtall")),
+    Key([mod], "q", lazy.window.kill(), desc="Kill focused window"),
+    Key(
+        [mod],
+        "f",
+        lazy.window.toggle_fullscreen(),
+        desc="Toggle fullscreen on the focused window",
+    ),
+    Key([mod], "t", lazy.window.toggle_floating(),
+        desc="Toggle floating on the focused window"),
     Key([mod, "control"], "r", lazy.reload_config(), desc="Reload the config"),
-    Key([mod, "control"], "q", lazy.shutdown(), desc="Shutdown Qtile"),
+
+    # Key chords
+    KeyChord([mod], "r", [
+        Key([], "b", lazy.spawn(browser)),
+        Key([], "f", lazy.spawn(file_manager)),
+        Key([], "d", lazy.spawn("discord")),
+        Key([], "s", lazy.spawn("slack")),
+        Key([], "c", lazy.spawn("code")),
+        Key([], "Space", lazy.spawn(launcher)),
+        Key([], "r", lazy.spawncmd()),
+    ], name="Run"),
+    KeyChord([mod], "p", [
+        Key([], "s", lazy.spawn("shutdown now")),
+        Key([], "l", lazy.spawn("xdg-screensaver activate")),
+        Key([], "r", lazy.spawn("reboot")),
+    ], name="Power"),
+
+    # Brightness / Volume
+    Key([], "XF86MonBrightnessDown", lazy.spawn("brightnessctl s 10%-"),
+        lazy.spawn("notify-send -u low 'Brightness -10%'")),
+    Key([], "XF86MonBrightnessUp", lazy.spawn("brightnessctl s 10%+"),
+        lazy.spawn("notify-send -u low 'Brightness +10%'")),
+    # TODO: Fix mute
+    Key([], "XF86AudioMute", lazy.widget["volume"].mute(),
+        lazy.spawn("notify-send -u low 'Volume toggled'")),
+    Key([], "XF86AudioLowerVolume", lazy.widget["volume"].decrease_vol(),
+        lazy.spawn("notify-send -u low 'Volume decreased'")),
+    Key([], "XF86AudioRaiseVolume", lazy.widget["volume"].increase_vol(),
+        lazy.spawn("notify-send -u low 'Volume increased'")),
+
+    # Toggle WidgetBox containing controls / taskbar / system monitor
+    Key([mod], "c", lazy.widget["controls"].toggle()),
+    Key([mod], "b", lazy.widget["taskbar"].toggle()),
+    Key([mod], "g", lazy.widget["graphs"].toggle()),
 
     # Screenshot
-
-    Key([], "Print", screenshot(), desc="Take a screenshot"),
-    Key(["mod1"], "Print", screenshot(mode=1),
-        desc="Take a screenshot of a zone or a window"),
-
-    # Wallpapers
-
-    Key([mod], "w", Wallpaper.next(), desc="Next background"),
-    Key([mod, "shift"], "w", Wallpaper.previous(), desc="Previous background"),
-
-    # Layouts
-
-    Key([mod], "l", lazy.next_layout(), desc="Toggle between layouts"),
-    Key([mod, "shift"], 'l', lazy.prev_layout(), desc="Previous layout"),
-    *[Key([mod, "control"], num_keys[index], lazy.group.setlayout(layout.name),
-          desc=f"Switch to the {layout.name} layout") for index, layout in enumerate(layouts)],
-
-    # Groups
-
-    Key([mod, "mod1"], "right", lazy.screen.next_group(), desc="Go to next group"),
-    Key([mod, "mod1"], "left", lazy.screen.prev_group(),
-        desc="Go to previous group"),
-    *[Key([mod], num_keys[index], lazy.group[group.name].toscreen(),
-          desc=f"Switch to the {group.name} group") for index, group in enumerate(groups)],
-    *[Key([mod, "shift"], num_keys[index], lazy.window.togroup(group.name, switch_group=True),
-          desc=f"Move focused window to the {group.name} group") for index, group in enumerate(groups)],
+    # TODO: Fix screenshot
+    Key([], "Print",
+        lazy.spawn(f"flameshot gui --clipboard --path {screenshots_path}"),
+        lazy.spawn(f"notify-send -u low 'Screenshot taken!' 'Saved in {screenshots_path}'")),
 ]
 
+groups = [Group(i) for i in "12345"]
 
-#   _____  _____  _____  _____  _____  _____  _____
-#  |   __||     || __  ||   __||   __||   | ||   __|
-#  |__   ||   --||    -||   __||   __|| | | ||__   |
-#  |_____||_____||__|__||_____||_____||_|___||_____|
+for i in groups:
+    keys.extend(
+        [
+            # mod1 + letter of group = switch to group
+            Key(
+                [mod],
+                i.name,
+                lazy.group[i.name].toscreen(),
+                desc="Switch to group {}".format(i.name),
+            ),
+            # mod1 + shift + letter of group = switch to & move focused window to group
+            Key(
+                [mod, "shift"],
+                i.name,
+                lazy.window.togroup(i.name, switch_group=True),
+                desc="Switch to & move focused window to group {}".format(
+                    i.name),
+            ),
+            # # mod1 + ctrl + letter of group = move focused window to group
+            Key([mod, "control"], i.name, lazy.window.togroup(i.name),
+                desc="move focused window to group {}".format(i.name)),
+        ]
+    )
 
-default_background = {
-    "colour": widget_background_color + hex(int(widget_background_opacity*255))[2:],
-    "radius": widget_background_radius,
-    "filled": True,
-    "padding_y": widget_background_y_padding,
-    "padding_x": widget_background_x_padding,
-    "group": True
+highlight_color = "#8da3a6"
+controls_width = 40
+window_margin = 8
+spacer_width = 13
+
+layouts = [
+    layout.MonadTall(
+        border_focus=highlight_color,
+        border_width=2,
+        change_ratio=0.04,
+        margin=window_margin,
+    ),
+    layout.Max(
+        border_focus=highlight_color,
+        border_width=2,
+        margin=window_margin,
+    ),
+]
+
+widget_background = "#324e52"
+
+decor_groups = {
+    "decorations": [
+        RectDecoration(colour=widget_background,
+                       filled=True, radius=10, group=True,)
+    ],
+    "padding": 9
 }
 
-
-class WidgetTweaker:
-    def __init__(self, func):
-        self.format = func
-
-
-@WidgetTweaker
-def groupBox(output):
-    index = groups_names.index(output)
-    label = groups_labels[index]
-
-    return label
-
-
-@WidgetTweaker
-def volume(output):
-    if output.endswith('%'):
-        volume = int(output[:-1])
-
-        icons = {
-            range(0, 33): '󰕿   ',
-            range(33, 66): '󰖀   ',
-            range(66, 101): '󰕾   '
-        }
-
-        icon = icons[next(filter(lambda r: volume in r, icons.keys()))]
-
-        return icon + output
-    elif output == 'M':
-        return '󰕿   Muted'
-    else:
-        return output
-
-
 widget_defaults = dict(
-    font=bar_font,
-    foreground=bar_foreground_color,
-    fontsize=bar_fontsize,
-    padding=widget_padding,
-    decorations=[widget.decorations.RectDecoration(**default_background)]
+    font="FiraCode Nerd Font Mono",
+    fontsize=15,
+    padding=2,
 )
-
 extension_defaults = widget_defaults.copy()
-
-left = [
-    widget.GroupBox(
-        font=f"{bar_font} Bold",
-        disable_drag=True,
-        borderwidth=0,
-        fontsize=15,
-        inactive=theme['black'],
-        active=bar_foreground_color,
-        block_highlight_text_color=theme['yellow'],
-        padding=7,
-        fmt=groupBox  # '●'
-    ),
-
-    widget.Prompt(
-    ),
-]
-
-right = [
-    widget.CPU(
-        format="{load_percent}%",
-        fmt="󰍛   {}",
-    ),
-
-    [
-        widget.Memory(
-            measure_mem="G",
-            measure_swap="G",
-            format="   {MemUsed: .2f}{mm} /{MemTotal: .2f}{mm}",
-        ),
-    ],
-
-    widget.Volume(
-        step=2,
-        fmt=volume,
-        mouse_callbacks={'Button1': lazy.spawn(
-            'pactl set-sink-mute @DEFAULT_SINK@ toggle')},
-        update_interval=0.01,
-        limit_max_volume=True,
-        volume_app="pavucontrol",
-    ),
-    widget.Battery(
-        format="{percent:2.0%}"
-    ),
-
-    widget.Clock(
-        format="%A %b %d %Y %I:%M %p",
-    ),
-
-    widget.TextBox(
-        '⏻',
-        mouse_callbacks={
-            'Button1': lazy.spawn(powermenu)
-        },
-        decorations=[widget.decorations.RectDecoration(
-            **default_background, extrawidth=3)],
-    ),
-]
-
-for index in range(1, 2*len(left)-1, 2):
-    left.insert(index, widget.Spacer(length=widget_gap, decorations=[]))
-
-for index in range(1, 2*len(right)-1, 2):
-    right.insert(index, widget.Spacer(length=widget_gap, decorations=[]))
-
-for widget_group in filter(lambda g: isinstance(g, list), left):
-    index = left.index(widget_group)
-    left.pop(index)
-    left = left[:index] + widget_group + left[index:]
-
-for widget_group in filter(lambda g: isinstance(g, list), right):
-    index = right.index(widget_group)
-    right.pop(index)
-    right = right[:index] + widget_group + right[index:]
 
 screens = [
     Screen(
-        top=bar.Bar(
-            widgets=[widget.Spacer(length=widget_left_offset, decorations=[])] + left + [widget.WindowName(foreground=bar_foreground_color,
-                                                                                                           format="{name}", decorations=[])] + right + [widget.Spacer(length=widget_right_offset, decorations=[])],
-            size=bar_size,
-            background=bar_background_color +
-            hex(int(bar_background_opacity*255))[2:],
-            margin=[bar_top_margin, bar_right_margin,
-                    bar_bottom_margin-layouts_margin, bar_left_margin],
-            opacity=bar_global_opacity
+        wallpaper="/home/jrivera/dotfiles/.local/share/wallpapers/bkq074xpdxm91.png",
+        wallpaper_mode="fill",
+        bottom=bar.Bar(
+            [
+                widget.TextBox("", fontsize=30,
+                               name="layout_icon", **decor_groups),
+                widget.Spacer(spacer_width),
+                widget.Spacer(7, **decor_groups),
+                widget.GroupBox(
+                    borderwidth=3,
+                    highlight_color=['#5b6b69', '#4e6361'],
+                    highlight_method='line',
+                    inactive='#AAAAAA',
+                    this_current_screen_border=highlight_color,
+                    **decor_groups,
+                    padding_x=5,
+                    fmt='●'
+                ),
+                widget.Spacer(7, **decor_groups),
+                widget.Spacer(spacer_width),
+                widget.WidgetBox(
+                    widgets=[
+                        widget.LaunchBar(
+                            # TODO: Modify progs list for app shortcuts
+                            progs=[
+                                ('/snap/firefox/3358/default256.png',
+                                 'firefox', 'Firefox'),
+                                ('/usr/share/code/resources/app/resources/linux/code.png',
+                                 'code', 'VS Code'),
+                                ('/opt/idea-IC-232.10072.27/bin/idea.png',
+                                 'idea.sh', 'IntelliJ IDEA'),
+                            ],
+                            **decor_groups,
+                            padding_x=12,
+                            padding_y=-1,
+                            icon_size=25,
+                        ),
+                        widget.Sep(
+                            padding_x=5,
+                            foreground=highlight_color,
+                            linewidth=2,
+                            **decor_groups
+                        ),
+                        widget.LaunchBar(
+                            # TODO: Find icons for power menu
+                            progs=[
+                                ('~/Pictures/icons/BW/system-shutdown.png',
+                                 'shutdown now', 'Shut down'),
+                                ('~/Pictures/icons/BW/system-reboot.png',
+                                 'reboot', 'Reboot'),
+                                ('~/Pictures/icons/BW/system-log-out.png',
+                                 'xdg-screensaver activate', 'Lock'),
+                            ],
+                            **decor_groups,
+                            padding_x=12,
+                            padding_y=-2,
+                            icon_size=25,
+                        ),
+                        widget.Sep(
+                            padding_x=5,
+                            foreground=highlight_color,
+                            linewidth=2,
+                            **decor_groups
+                        ),
+                        widget.Systray(
+                            icon_size=22,
+                            background="#000000",
+                            **decor_groups
+                        ),
+                        widget.Spacer(9, **decor_groups),
+                        widget.Spacer(spacer_width),
+                    ],
+                    close_button_location='left',
+                    text_closed="󰏌",
+                    text_open="󰅘",
+                    fontsize=30,
+                    # start_opened=True,
+                    name="taskbar",
+                    **decor_groups,
+                ),
+                widget.Spacer(spacer_width),
+                widget.WindowName(
+                    max_chars=20,
+                    **decor_groups,
+                    width=210,
+                    empty_group_string='󰍹 Desktop'
+                ),
+                widget.Spacer(),
+                widget.Chord(**decor_groups),
+                widget.Prompt(**decor_groups),
+                widget.Spacer(spacer_width),
+                widget.WidgetBox(
+                    widgets=[
+                        widget.TextBox(
+                            "󰻠",
+                            fontsize=30,
+                            **decor_groups
+                        ),
+                        widget.CPUGraph(
+                            border_color=highlight_color,
+                            border_width=1,
+                            line_width=2,
+                            graph_color=highlight_color,
+                            line_color=highlight_color,
+                            fill_color=highlight_color+".6",
+                            **decor_groups
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.TextBox(
+                            "󰍛",
+                            fontsize=30,
+                            **decor_groups
+                        ),
+                        widget.MemoryGraph(
+                            border_color=highlight_color,
+                            border_width=1,
+                            line_width=2,
+                            graph_color=highlight_color,
+                            line_color=highlight_color,
+                            fill_color=highlight_color+".6",
+                            **decor_groups
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.TextBox(
+                            "󰛶",
+                            fontsize=30,
+                            **decor_groups
+                        ),
+                        widget.NetGraph(
+                            border_color=highlight_color,
+                            border_width=1,
+                            line_width=2,
+                            graph_color=highlight_color,
+                            line_color=highlight_color,
+                            bandwidth_type='up',
+                            fill_color=highlight_color+".6",
+                            **decor_groups
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.TextBox(
+                            "󰛴",
+                            fontsize=30,
+                            **decor_groups
+                        ),
+                        widget.NetGraph(
+                            border_color=highlight_color,
+                            border_width=1,
+                            line_width=2,
+                            graph_color=highlight_color,
+                            line_color=highlight_color,
+                            bandwidth_type='down',
+                            fill_color=highlight_color+".6",
+                            **decor_groups
+                        ),
+                    ],
+                    close_button_location='right',
+                    text_closed="󱕎",
+                    text_open="󰅘",
+                    fontsize=30,
+                    name="graphs",
+                    **decor_groups,
+                ),
+                widget.Spacer(spacer_width),
+                widget.WidgetBox(
+                    widgets=[
+                        widget.TextBox(
+                            "",
+                            fontsize=28,
+                            name="wifi-text",
+                            **decor_groups,
+                        ),
+                        widget.Spacer(-5, **decor_groups),
+                        # TODO: Verify wlan interface
+                        widget.Wlan(
+                            interface='wlp58s0',
+                            format='{percent:2.0%} {essid}',
+                            max_chars=10,
+                            update_interval=20,
+                            **decor_groups,
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.Volume(
+                            emoji=True,
+                            emoji_list=['󰸈', '', '', ''],
+                            fontsize=25,
+                            step=10,
+                            update_interval=0.1,
+                            **decor_groups
+                        ),
+                        widget.Spacer(-5, **decor_groups),
+                        widget.GenPollCommand(
+                            width=controls_width + 15,
+                            cmd="amixer sget Master | egrep '\[[0-9]{1,3}%\]' | awk -F'\[|\]' '{print $2}'",
+                            shell=True,
+                            update_interval=0.1,
+                            **decor_groups
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.TextBox(
+                            "󰃠",
+                            fontsize=25,
+                            name="backlight-text",
+                            **decor_groups
+                        ),
+                        widget.Spacer(-5, **decor_groups),
+                        widget.Backlight(
+                            width=controls_width + 15,
+                            backlight_name='intel_backlight',
+                            **decor_groups
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.Battery(
+                            width=controls_width + 32,
+                            unknown_char='󰂑',
+                            charge_char='󰂏',
+                            discharge_char='󰂌',
+                            full_char='󱈑',
+                            format='{char} {percent:2.0%}',
+                            show_short_text=False,
+                            low_percentage=0.25,
+                            notify_below=25,
+                            update_interval=20,
+                            **decor_groups,
+                        ),
+                        widget.Spacer(spacer_width, **decor_groups),
+                        widget.TextBox(
+                            "󰢑",
+                            fontsize=25,
+                            name="temp-text",
+                            **decor_groups
+                        ),
+                        widget.Spacer(-5, **decor_groups),
+                        widget.ThermalSensor(
+                            update_interval=20,
+                            **decor_groups
+                        ),
+                        widget.Spacer(5, **decor_groups),
+                    ],
+                    close_button_location='right',
+                    text_closed="󰧭",
+                    text_open="󰅘",
+                    fontsize=30,
+                    name="controls",
+                    start_opened=True,
+                    **decor_groups,
+                ),
+                widget.Spacer(spacer_width),
+                widget.Clock(
+                    format="%a %d-%m-%y %I:%M%p",
+                    **decor_groups
+                ),
+            ],
+            38,
+            background="#00000000",
+            margin=[0, window_margin, window_margin, window_margin],
         ),
+        # You can uncomment this variable if you see that on X11 floating resize/moving is laggy
+        # By default we handle these events delayed to already improve performance, however your system might still be struggling
+        # This variable is set to None (no cap) by default, but you can set it to 60 to indicate that you limit it to 60 events per second
+        # x11_drag_polling_rate = 60,
     ),
 ]
 
-
-#   _____  _____  _____  _____  _____
-#  |     ||     ||  |  ||   __||   __|
-#  | | | ||  |  ||  |  ||__   ||   __|
-#  |_|_|_||_____||_____||_____||_____|
-
-DPX = 50  # Distance needed to grow one time on the X axis
-DPY = 25  # Distance needed to grow one time on the Y axis
-
-last = {
-    'x': 0,
-    'y': 0,
-    'client': ''
-}
-
-
-@lazy.function
-def resizeClientColumnsLayout(_qtile, x, y):
-    global last
-
-    _layout = _qtile.current_group.layout
-
-    if _layout.name != "columns":
-        return
-
-    _column = _layout.columns[_layout.current]
-    _client = _column.clients[_column.current]
-
-    # If the window title changed or x, y anormally low -> reset last
-    if abs(last['x'] - x) >= 5 * DPX or abs(last['y'] - y) >= 5 * DPY or _client.name != last['client']:
-        last = {
-            'x': 0,
-            'y': 0,
-            'client': _client.name
-        }
-
-    delta_x = x - last['x']
-    delta_y = y - last['y']
-
-    for _ in range(abs(delta_x) // DPX):
-        if delta_x < 0:
-            _layout.grow_left()
-        else:
-            _layout.grow_right()
-
-    for _ in range(abs(delta_y) // DPY):
-        if delta_y < 0:
-            _layout.grow_up()
-        else:
-            _layout.grow_down()
-
-    if abs(delta_x) // DPX or abs(delta_y) >= DPY:
-        last = {
-            'x': x,
-            'y': y,
-            'client': _client.name
-        }
-
-
+# Drag floating layouts.
 mouse = [
     Drag([mod], "Button1", lazy.window.set_position_floating(),
          start=lazy.window.get_position()),
     Drag([mod], "Button3", lazy.window.set_size_floating(),
          start=lazy.window.get_size()),
     Click([mod], "Button2", lazy.window.bring_to_front()),
-    Drag([mod, "control"], "Button3", resizeClientColumnsLayout())
 ]
 
-
-#   _____  _____  _____  _____  _____    _____  _____  _____  _____  _____  _____  _____  _____
-#  |     ||_   _||  |  ||   __|| __  |  |   __||   __||_   _||_   _||     ||   | ||   __||   __|
-#  |  |  |  | |  |     ||   __||    -|  |__   ||   __|  | |    | |  |-   -|| | | ||  |  ||__   |
-#  |_____|  |_|  |__|__||_____||__|__|  |_____||_____|  |_|    |_|  |_____||_|___||_____||_____|
-
 dgroups_key_binder = None
-dgroups_app_rules = []
+dgroups_app_rules = []  # type: list
 follow_mouse_focus = True
 bring_front_click = False
 floats_kept_above = True
 cursor_warp = False
 floating_layout = layout.Floating(
-    **layout_theme,
     float_rules=[
+        # Run the utility of `xprop` to see the wm class and name of an X client.
         *layout.Floating.default_float_rules,
         Match(wm_class="confirmreset"),  # gitk
         Match(wm_class="makebranch"),  # gitk
         Match(wm_class="maketag"),  # gitk
         Match(wm_class="ssh-askpass"),  # ssh-askpass
         Match(title="branchdialog"),  # gitk
-        Match(title="pinentry"),  # GPG key password entry,
-        *[Match(wm_class=app) for app in floating_apps]
+        Match(title="pinentry"),  # GPG key password entry
     ]
 )
 auto_fullscreen = True
 focus_on_window_activation = "smart"
 reconfigure_screens = True
-auto_minimize = False
-wmname = "Qtile"
 
+# If things like steam games want to auto-minimize themselves when losing
+# focus, should we respect this or not?
+auto_minimize = True
 
-#   _____  _____  _____  _____  _____
-#  |  |  ||     ||     ||  |  ||   __|
-#  |     ||  |  ||  |  ||    -||__   |
-#  |__|__||_____||_____||__|__||_____|
+# When using the Wayland backend, this can be used to configure input devices.
+wl_input_rules = None
 
-ready = False
-
-
-@hook.subscribe.startup_once
-def _():
-    run(autostart_file)
-
-
-@hook.subscribe.layout_change
-def _(layout, group):
-    global ready
-
-    if ready:
-        with open(layouts_saved_file, 'r') as file:
-            layouts_saved = load(file)
-
-        layouts_saved[group.name] = layout.name
-
-        with open(layouts_saved_file, 'w') as file:
-            dump(layouts_saved, file)
-
-
-@hook.subscribe.startup
-def _():
-    global ready
-
-    with open(layouts_saved_file, 'r') as file:
-        layouts_saved = load(file)
-
-    for group in groups:
-        if layouts_saved.get(group.name):
-            qtile.groups_map.get(group.name).layout = layouts_saved[group.name]
-
-    ready = True
-
-
-# Default app
-def open_url(url):
-    run(["xdg-open", url])
+# XXX: Gasp! We're lying here. In fact, nobody really uses or cares about this
+# string besides java UI toolkits; you can see several discussions on the
+# mailing lists, GitHub issues, and other WM documentation that suggest setting
+# this string if your java app doesn't work correctly. We may as well just lie
+# and say that we're a working one by default.
+#
+# We choose LG3D to maximize irony: it is a 3D non-reparenting WM written in
+# java that happens to be on java's whitelist.
+wmname = "LG3D"
