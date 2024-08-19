@@ -30,6 +30,9 @@ from qtile_extras.widget.decorations import RectDecoration
 from libqtile.config import Click, Drag, Group, Key, KeyChord, Match, Screen
 from libqtile.lazy import lazy
 from libqtile.utils import guess_terminal
+import os
+import json
+import subprocess
 
 mod = "mod4"
 terminal = "alacritty"
@@ -37,7 +40,7 @@ browser = "google-chrome"
 file_manager = "thunar"
 launcher = "rofi -show drun"
 screenshots_path = "~/Images/screenshots/"
-autostart_file = "~/.config/qtile/autostart.sh"
+autostart_file = "~/dotfiles/.config/qtile/autostart.sh"
 wallpapers_path = "~/.local/share/wallpapers/"
 
 keys = [
@@ -170,7 +173,18 @@ for i in groups:
         ]
     )
 
-highlight_color = "#8da3a6"
+
+def load_pywal_colors():
+    # Load pywal colors
+    home = os.path.expanduser("~")
+    with open(f"{home}/.cache/wal/colors.json") as f:
+        colors = json.load(f)
+    return colors
+
+
+colors = load_pywal_colors()
+
+highlight_color = colors["colors"]["color3"]
 controls_width = 40
 window_margin = 8
 spacer_width = 13
@@ -189,7 +203,7 @@ layouts = [
     ),
 ]
 
-widget_background = "#324e52"
+widget_background = highlight_color
 
 decor_groups = {
     "decorations": [
@@ -203,6 +217,8 @@ widget_defaults = dict(
     font="FiraCode Nerd Font Mono",
     fontsize=15,
     padding=2,
+    background=colors["special"]["background"],
+    foreground=colors["colors"]["color0"],
 )
 extension_defaults = widget_defaults.copy()
 
@@ -218,10 +234,10 @@ screens = [
                 widget.Spacer(7, **decor_groups),
                 widget.GroupBox(
                     borderwidth=3,
-                    highlight_color=['#5b6b69', '#4e6361'],
-                    highlight_method='line',
-                    inactive='#AAAAAA',
-                    this_current_screen_border=highlight_color,
+                    highlight_color=highlight_color,
+                    highlight_method="block",
+                    active=colors["colors"]["color0"],
+                    this_current_screen_border=colors["colors"]["color6"],
                     **decor_groups,
                     padding_x=5,
                     fmt='●'
@@ -307,12 +323,12 @@ screens = [
                             **decor_groups
                         ),
                         widget.CPUGraph(
-                            border_color=highlight_color,
+                            border_color=colors["colors"]["color0"],
                             border_width=1,
                             line_width=2,
-                            graph_color=highlight_color,
-                            line_color=highlight_color,
-                            fill_color=highlight_color+".6",
+                            graph_color=colors["colors"]["color0"],
+                            line_color=colors["colors"]["color0"],
+                            fill_color=colors["colors"]["color0"],
                             **decor_groups
                         ),
                         widget.Spacer(spacer_width, **decor_groups),
@@ -322,12 +338,12 @@ screens = [
                             **decor_groups
                         ),
                         widget.MemoryGraph(
-                            border_color=highlight_color,
+                            border_color=colors["colors"]["color0"],
                             border_width=1,
                             line_width=2,
-                            graph_color=highlight_color,
-                            line_color=highlight_color,
-                            fill_color=highlight_color+".6",
+                            graph_color=colors["colors"]["color0"],
+                            line_color=colors["colors"]["color0"],
+                            fill_color=colors["colors"]["color0"],
                             **decor_groups
                         ),
                         widget.Spacer(spacer_width, **decor_groups),
@@ -337,13 +353,13 @@ screens = [
                             **decor_groups
                         ),
                         widget.NetGraph(
-                            border_color=highlight_color,
+                            border_color=colors["colors"]["color0"],
                             border_width=1,
                             line_width=2,
-                            graph_color=highlight_color,
-                            line_color=highlight_color,
+                            graph_color=colors["colors"]["color0"],
+                            line_color=colors["colors"]["color0"],
                             bandwidth_type='up',
-                            fill_color=highlight_color+".6",
+                            fill_color=colors["colors"]["color0"],
                             **decor_groups
                         ),
                         widget.Spacer(spacer_width, **decor_groups),
@@ -353,13 +369,13 @@ screens = [
                             **decor_groups
                         ),
                         widget.NetGraph(
-                            border_color=highlight_color,
+                            border_color=colors["colors"]["color0"],
                             border_width=1,
                             line_width=2,
-                            graph_color=highlight_color,
-                            line_color=highlight_color,
+                            graph_color=colors["colors"]["color0"],
+                            line_color=colors["colors"]["color0"],
                             bandwidth_type='down',
-                            fill_color=highlight_color+".6",
+                            fill_color=colors["colors"]["color0"],
                             **decor_groups
                         ),
                     ],
@@ -461,7 +477,7 @@ screens = [
                 ),
             ],
             38,
-            background="#00000000",
+            # background="#00000000",
             margin=[0, window_margin, window_margin, window_margin],
         ),
         # You can uncomment this variable if you see that on X11 floating resize/moving is laggy
