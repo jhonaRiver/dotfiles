@@ -406,6 +406,7 @@ screens = [
                         ),
                         widget.Spacer(spacer_width, **decor_groups),
                         widget.Volume(
+                            background=colors["colors"]["color0"],
                             emoji=True,
                             emoji_list=['󰸈', '', '', ''],
                             fontsize=25,
